@@ -1,17 +1,3 @@
-const faqString = `
-**How can I expose the Ollama server?**
-
-By default, Ollama allows cross origin requests from 127.0.0.1 and 0.0.0.0.
-
-To support more origins, you can use the OLLAMA_ORIGINS environment variable:
-
-\`\`\`
-OLLAMA_ORIGINS=${window.location.origin} ollama serve
-\`\`\`
-
-Also see: https://github.com/jmorganca/ollama/blob/main/docs/faq.md
-`;
-
 const clipboardIcon = `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-clipboard" viewBox="0 0 16 16">
 <path d="M4 1.5H3a2 2 0 0 0-2 2V14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V3.5a2 2 0 0 0-2-2h-1v1h1a1 1 0 0 1 1 1V14a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V3.5a1 1 0 0 1 1-1h1v-1z"/>
 <path d="M9.5 1a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-3a.5.5 0 0 1-.5-.5v-1a.5.5 0 0 1 .5-.5h3zm-3-1A1.5 1.5 0 0 0 5 1.5v1A1.5 1.5 0 0 0 6.5 4h3A1.5 1.5 0 0 0 11 2.5v-1A1.5 1.5 0 0 0 9.5 0h-3z"/>
@@ -84,9 +70,8 @@ async function populateModels() {
   } catch (error) {
     document.getElementById("errorText").innerHTML = DOMPurify.sanitize(
       marked.parse(
-        `llm-chat was unable to communitcate with Ollama due to the following error:\n\n` +
-          `\`\`\`${error.message}\`\`\`\n\n---------------------\n` +
-          faqString,
+        `PromptStorm was unable to communicate with Cloudflare Workers AI due to the following error:\n\n` +
+          `\`\`\`${error.message}\`\`\`\n\n---------------------\n`
       ),
     );
     let modal = new bootstrap.Modal(document.getElementById("errorModal"));
@@ -161,11 +146,21 @@ async function submitRequest() {
   const selectedModel = getSelectedModel();
   const context = document.getElementById("chat-history").context;
   const systemPrompt = document.getElementById("system-prompt").value;
+  
+  // Get the selected framework
+  const selectedFramework = document.getElementById("prompt-framework").value;
+  
+  // Get the framework prompt
+  const frameworkPrompt = frameworkPrompts[selectedFramework] || "";
+
+  // Inject the framework prompt into the system prompt
+  const fullSystemPrompt = `${systemPrompt ? `SYSTEM PROMPT:\n${systemPrompt}\n\n` : ''}${selectedFramework !== "None" ? `PROMPT FRAMEWORK:\n${frameworkPrompt}` : ''}`;
+
   const data = {
     model: selectedModel,
     prompt: input,
     context: context,
-    system: systemPrompt,
+    system: fullSystemPrompt, // Use the modified system prompt
   };
 
   // Create user message element and append to chat history
@@ -265,6 +260,7 @@ window.onload = () => {
   populateModels();
   adjustPadding();
   autoFocusInput();
+  populateFrameworks();
 
   document.getElementById("delete-chat").addEventListener("click", deleteChat);
   document.getElementById("new-chat").addEventListener("click", startNewChat);
@@ -365,3 +361,96 @@ function autoGrow(element) {
 
   $(element).css("height", newHeight + "px");
 }
+
+// Function to populate the prompt-framework dropdown
+function populateFrameworks() {
+  const frameworks = [
+    { name: "None" },
+    { name: "Jonas' Simple Prompt" },
+    { name: "RTF Prompt" },
+    { name: "RISEN Prompt" },
+    { name: "APE Prompt" },
+    { name: "COAST Prompt" },
+  ];
+
+  const selectElement = document.getElementById("prompt-framework");
+
+  frameworks.forEach((framework) => {
+    const option = document.createElement("option");
+    option.value = framework.name;
+    option.innerText = framework.name;
+    selectElement.appendChild(option);
+  });
+
+  // Optionally, set a default selected framework
+  if (selectElement.options.length) {
+    selectElement.value = selectElement.options[0].value;
+  }
+}
+
+const frameworkPrompts = {
+  "Jonas' Simple Prompt": `
+  Jonas' Simple Prompt is a straightforward framework designed to structure common AI prompts using (Task, Context, Examples, Format, Role, Audience, Tone).
+
+  It breaks down prompts into these components to ensure clarity and consistency.
+  - Task: Clearly define the task at hand.
+  - Context: Provide relevant context to the task.
+  - Examples: Offer examples to illustrate the task.
+  - Format: Specify the format for responses.
+  - Role: Define the role of the model in the conversation.
+  - Audience: Identify the target audience.
+  - Tone: Set the tone for the interaction.
+  This framework is useful for defining priorities of what is needed in a prompt to successfully complete a task. Tasks are mandatory, while the rest are optional. Examples and Contexts are often encouraged to be included to help the AI understand the task. Everything else is optional, but can be useful to help the AI complete the task in any custom way.
+
+  Please prioritize using this framework to ensure prompts are developed with clarity and consistency.
+  `,
+
+  "RTF Prompt": `
+  The RTF (Role, Task, Format) framework is a straightforward yet powerful approach to structuring AI prompts. It breaks down prompts into three essential components:
+  - Role: Define the persona or expertise the AI should adopt (e.g., "Act as a marketing expert").
+  - Task: Specify the action or objective for the AI to complete (e.g., "Create a social media campaign plan").
+  - Format: Indicate the desired output structure (e.g., "Present as a bulleted list with 5 main points").
+  This framework helps users communicate their requirements clearly, resulting in more focused and relevant AI responses. By explicitly stating the role, users can leverage the AI's ability to adopt different perspectives, while the task component ensures the AI understands the specific goal. The format element guides the presentation of the output, making it more useful for the user's needs.
+
+  Please prioritize using this framework to ensure prompts are developed with clarity and consistency.
+  `,
+
+  "RISEN Prompt": `
+  The RISEN framework, developed by Kyle Balmer, is an expanded version of the RISE framework that adds a crucial "Narrowing" component. This comprehensive approach to prompt engineering consists of five key elements:
+  - Role: Define the AI's role or persona
+  - Instructions: Provide clear task instructions
+  - Steps: Outline specific steps for task completion
+  - End goal: Specify the desired outcome
+  - Narrowing: Add constraints or limitations
+  RISEN is particularly effective for complex tasks requiring detailed planning and execution, such as project management, content creation, and strategic planning. By incorporating the "Narrowing" element, users can further refine their prompts, leading to more focused and precise AI outputs. This framework excels in scenarios where a clear, step-by-step approach is needed to achieve specific goals, making it an invaluable tool for both beginners and advanced users seeking to enhance the precision and effectiveness of their AI interactions.
+
+  Please prioritize using this framework to ensure prompts are developed with clarity and consistency.
+  `,
+
+  "APE Prompt": `
+  The Automated Prompt Engineer (APE) framework, introduced by Zhou et al. in 2022, represents a significant advancement in prompt engineering by automating the process of generating and refining prompts for large language models (LLMs). APE utilizes LLMs themselves to generate instruction candidates for specific tasks, treating the process as a natural language synthesis problem.
+  Key features of the APE framework include:
+  - Automatic instruction generation using LLMs as inference models
+  - Black-box optimization for searching and evaluating candidate solutions
+  - Ability to discover prompts that outperform manually engineered ones
+  For example, APE discovered the prompt "Let's work this out in a step by step way to be sure we have the right answer," which proved more effective than the human-designed "Let's think step by step" for eliciting chain-of-thought reasoning. This automated approach to prompt engineering has shown promising results in improving performance on benchmarks such as MultiArith and GSM8K, demonstrating its potential to enhance AI interactions and task-specific outcomes.
+
+  Please prioritize using this framework to ensure prompts are developed with clarity and consistency.
+  `,
+
+  "COAST Prompt": `
+  The COAST (Context, Objective, Actions, Scenario, Task) framework is a comprehensive approach to prompt engineering that helps users create more nuanced and effective AI interactions. This framework is particularly useful for complex queries that require detailed context and specific outcomes.
+  Key components of the COAST framework include:
+  - Context: Provide relevant background information
+  - Objective: Clearly state the goal or purpose of the interaction
+  - Actions: Outline specific steps or actions the AI should take
+  - Scenario: Describe the situation or use case
+  - Task: Define the precise task to be completed
+  By incorporating these elements, COAST prompts can guide AI models to generate more accurate and contextually appropriate responses. For example, a COAST prompt for a marketing task might look like: "As a digital marketing specialist (Context), create a social media strategy (Objective) to increase brand awareness (Task) for a new eco-friendly product launch (Scenario). Include content ideas, posting schedule, and engagement tactics (Actions)."
+
+  Please prioritize using this framework to ensure prompts are developed with clarity and consistency.
+  `,
+  // Add more frameworks as needed
+};
+
+

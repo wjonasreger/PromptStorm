@@ -2,7 +2,7 @@
 <html>
 
 <head>
-    <title>Chat with Llama2</title>
+    <title>PromptStorm</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link rel="shortcut icon" type="image/x-icon" href="favicon.ico">
     <link href="resources/bootstrap.min.css" rel="stylesheet"
@@ -35,21 +35,29 @@
 
           <div class="position-fixed w-100" style="z-index: 9999; top: 0px; height: 200px;  background: linear-gradient(180deg, black, transparent);">
             <div class="d-flex justify-content-between align-items-center m-0" style="padding: 16px;">
-                <h1>Chat with Ollama</h1>
+                <h1 style="padding-left: 20px;">PromptStorm Copilot</h1>
                 <!-- Model dropdown -->
                 <div class="d-flex align-items-center m-1">
                   <div class="p-2 flex-grow-1 bd-highlight">
                     <label for="system-prompt" class="me-2" style="font-size: normal;">System Prompt</label>
                     <input id="system-prompt" class="form-control" type="text" placeholder="You are a helpful assistant" style="width: auto;"></select>
-                    <label for="host-address" class="me-2" style="font-size: normal;">Hostname</label>
-                    <input id="host-address" class="form-control" type="text" placeholder="http://localhost:11434" style="width: auto;"></select>
+
+                    <label for="prompt-framework" class="me-2" style="font-size: normal;">Framework</label>
+                    <select id="prompt-framework" class="form-select me-2" style="width: auto;">
+                        <!-- <option value="" disabled selected>Select a framework</option> -->
+                    </select>
+                    
+                    <!-- <label for="host-address" class="me-2" style="font-size: normal;">Hostname</label>
+                    <input id="host-address" class="form-control" type="text" placeholder="http://localhost:11434" style="width: auto;"></select> -->
 
                   </div>
                 <div class="d-flex align-items-center m-2">
                     <div class="p-2 flex-grow-1 bd-highlight">
-                        <label for="model-select" class="me-2" style="font-size: normal;">Model:</label>
+
+                        <label for="model-select" class="me-2" style="font-size: normal;">Model</label>
                         <select class="form-select me-5" id="model-select" style="width: auto;"></select>
-                        <label for="chat-select" class="me-2" style="font-size: normal;">History:</label>
+
+                        <label for="chat-select" class="me-2" style="font-size: normal;">History</label>
                         <select id="chat-select" class="form-select me-2" style="width: auto;">
                             <option value="" disabled selected>Select a chat</option>
                         </select>
@@ -80,11 +88,11 @@
     <div class="modal-dialog" >
       <div class="modal-content">
         <div class="modal-header">
-          <h5 class="modal-title" id="nameModalLabel">Enter Your Name</h5>
+          <h5 class="modal-title" id="nameModalLabel">Name your chat</h5>
           <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
         </div>
         <div class="modal-body">
-          <input type="text" class="form-control" id="userName" placeholder="Your Name">
+          <input type="text" class="form-control" id="userName" placeholder="Chat Name">
         </div>
         <div class="modal-footer">
           <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
@@ -98,7 +106,7 @@
     <div class="modal-dialog modal-xl">
       <div class="modal-content">
         <div class="modal-header">
-          <h5 class="modal-title">Unable to access Ollama server</h5>
+          <h5 class="modal-title">Unable to access Cloudflare Workers AI</h5>
           <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
         </div>
         <div class="modal-body">
